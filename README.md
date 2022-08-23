@@ -1,8 +1,6 @@
 # NFTDoor
 
-NFTDoor is dynamic NFT launchpad powered by Chainlink VRF v2.
-
-It allows creator to create and sell dynamic NFT very easilly. 
+NFTDoor is dynamic NFT launchpad powered by Chainlink VRF v2, creators can create and sell dynamic NFT very easily.
 
 ## Inspiration
 
