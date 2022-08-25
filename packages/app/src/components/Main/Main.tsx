@@ -3,22 +3,14 @@ import React from "react";
 
 import config from "../../../config.json";
 import { ConnectWalletWrapper } from "../ConnectWalletWrapper";
-import { useConsole } from "../Console";
 
 export const Main: React.FC = () => {
-  const { console } = useConsole();
-
   const main = () => {
     console.log("main logic start...");
   };
 
   return (
-    <Box
-      boxShadow={"base"}
-      borderRadius="2xl"
-      p="4"
-      backgroundColor={config.styles.background.color.main}
-    >
+    <Box boxShadow={"base"} borderRadius="2xl" p="4" backgroundColor={config.styles.background.color.main}>
       <Stack spacing="4">
         <ConnectWalletWrapper>
           <Button
