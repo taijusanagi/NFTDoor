@@ -27,6 +27,8 @@ contract NFTDoor is Ownable, VRFConsumerBaseV2, ERC721 {
   uint32 callbackGasLimit = 100000;
   uint16 requestConfirmations = 3;
 
+  string private _baseTokenURI;
+
   uint256 public totalSupply;
   uint256 public mintLimit;
   uint256 public mintPrice;
@@ -35,13 +37,13 @@ contract NFTDoor is Ownable, VRFConsumerBaseV2, ERC721 {
     uint64 subscriptionId,
     string memory name,
     string memory symbol,
-    string memory tokenBaseURI,
+    string memory baseTokenURI,
     uint256 mintLimit,
     uint256 mintPrice
   ) VRFConsumerBaseV2(vrfCoordinator) ERC721(name, symbol) {
     COORDINATOR = VRFCoordinatorV2Interface(vrfCoordinator);
     s_subscriptionId = subscriptionId;
-    _tokenBaseURI = tokenBaseURI;
+    _baseTokenURI = baseTokenURI;
     mintLimit = mintLimit;
     mintPrice = mintPrice;
   }
@@ -78,7 +80,7 @@ contract NFTDoor is Ownable, VRFConsumerBaseV2, ERC721 {
   }
 
   //TODO: We should have contract address in base uri
-  function _baseURI() internal pure override returns (string memory) {
-    return _tokenBaseURI;
+  function _baseURI() internal view override returns (string memory) {
+    return _baseTokenURI;
   }
 }
