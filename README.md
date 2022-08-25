@@ -1,8 +1,6 @@
-# Dynamic NFT Portal 2022 Polygon Encoded
+# NFTDoor
 
-## Concept
-
-Dynamic NFT Portal is dynamic NFT launchpad. It allows creator to create dynamic NFT very easilly. Buying user can buy NFT from this portal.
+NFTDoor is dynamic NFT launchpad powered by Chainlink VRF v2, creators can create and sell dynamic NFT very easily.
 
 ## Inspiration
 
