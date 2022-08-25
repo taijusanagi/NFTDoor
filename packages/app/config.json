@@ -1,0 +1,46 @@
+{
+  "app": {
+    "name": "NAME",
+    "description": "DESCRIPTION",
+    "uri": "http://localhost:3000",
+    "defaultLog": "default log goes here"
+  },
+  "links": {
+    "github": {
+      "uri": "https://github.com/HackerSamuraiDAO/template",
+      "icon": ""
+    }
+  },
+  "wallets": {
+    "injected": {
+      "name": "Metamask",
+      "icon": "metamask.webp",
+      "connector": "ingectedConnector"
+    },
+    "walletConnect": {
+      "name": "Wallet Connect",
+      "icon": "walletConnect.png",
+      "connector": "walletConnectConnector"
+    }
+  },
+  "styles": {
+    "button": {
+      "variant": "outline",
+      "rounded": "2xl",
+      "size": "lg",
+      "fontSize": "sm"
+    },
+    "text": {
+      "color": {
+        "primary": "gray.800",
+        "secondary": "gray.600"
+      }
+    },
+    "background": {
+      "color": {
+        "main": "white",
+        "layout": "white"
+      }
+    }
+  }
+}
