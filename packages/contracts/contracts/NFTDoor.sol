@@ -6,7 +6,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 
-
 //TODO: make this re-usable. we allow uesr to create register new dynamic NFT as launchpad.
 //TODO: We need to handle metadata request from each contract
 contract NFTDoor is Ownable, VRFConsumerBaseV2, ERC721 {
@@ -41,12 +40,16 @@ contract NFTDoor is Ownable, VRFConsumerBaseV2, ERC721 {
     uint256 mintLimit,
     uint256 mintPrice
   ) VRFConsumerBaseV2(vrfCoordinator) ERC721(name, symbol) {
-    address tt = address(this);
     COORDINATOR = VRFCoordinatorV2Interface(vrfCoordinator);
     s_subscriptionId = subscriptionId;
-    _baseTokenURI = baseTokenURI;
     mintLimit = mintLimit;
     mintPrice = mintPrice;
+
+    setBaseTokenURI(baseTokenURI);
+  }
+
+  function setBaseTokenURI(string memory baseTokenURI) public payable onlyOwner {
+    _baseTokenURI = baseTokenURI;
   }
 
   function withdraw(address _recepient) public payable onlyOwner {
