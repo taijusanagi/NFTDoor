@@ -10,7 +10,7 @@ export const Footer: React.FC = () => {
     <Box px="4" py="2" as="footer">
       <Stack justify="space-between" direction="row" align="center">
         <Text fontSize="xs" color={config.styles.text.color.secondary}>
-          {config.app.description}
+          {config.app.description.short}
         </Text>
         <ButtonGroup variant={"ghost"}>
           {Object.entries(config.links).map(([key, link]) => (

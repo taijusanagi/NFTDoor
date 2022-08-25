@@ -8,7 +8,7 @@ import { Wallet } from "../Wallet";
 export const Header: React.FC = () => {
   return (
     <Box p="4" as="header">
-      <Flex justify="space-between">
+      <Flex justify="space-between" align="center">
         <Text fontWeight={"bold"} color={config.styles.text.color}>
           {config.app.name}
         </Text>

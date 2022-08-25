@@ -13,7 +13,7 @@ export const SEO: React.FC = () => {
       <meta property="og:type" content="website" />
       <meta property="og:title" content={config.app.name} />
       <meta property="og:site_name" content={config.app.name} />
-      <meta property="og:description" content={config.app.description} />
+      <meta property="og:description" content={config.app.description.long} />
       <meta property="og:image" content={`${config.app.uri}/brands/ogp.png`} />
       <meta name="twitter:card" content={"summary_large_image"} />
     </NextHead>
