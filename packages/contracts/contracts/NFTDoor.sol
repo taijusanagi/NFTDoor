@@ -14,7 +14,8 @@ contract NFTDoor is Ownable, VRFConsumerBaseV2, ERC721 {
     uint256 tokenId;
   }
 
-  event Minted(uint256 tokenId, uint256 randomNumber);
+  event BaseTokenURISet(string baseTokenURI);
+  event Minted(uint256 indexed tokenId, uint256 randomNumber);
 
   mapping(uint256 => MintInfo[]) public requestIdToMintInfos;
   mapping(uint256 => uint256) public tokenIdToRandomNumber;
@@ -50,6 +51,7 @@ contract NFTDoor is Ownable, VRFConsumerBaseV2, ERC721 {
 
   function setBaseTokenURI(string memory baseTokenURI) public payable onlyOwner {
     _baseTokenURI = baseTokenURI;
+    emit BaseTokenURISet(baseTokenURI);
   }
 
   function withdraw(address _recepient) public payable onlyOwner {
