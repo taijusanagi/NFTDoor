@@ -1,14 +1,12 @@
 {
   "app": {
-    "name": "NAME",
-    "description": "DESCRIPTION",
-    "uri": "http://localhost:3000",
-    "defaultLog": "default log goes here"
+    "name": "NFTDoor",
+    "description": "NFTDoor is dynamic NFT launchpad powered by Chainlink VRF v2, creators can create and sell dynamic NFT very easily.",
+    "uri": "https://nftdoor.vercel.app/"
   },
   "links": {
     "github": {
-      "uri": "https://github.com/HackerSamuraiDAO/template",
-      "icon": ""
+      "uri": "https://github.com/taijusanagi/NFTDoor"
     }
   },
   "wallets": {
