@@ -6,11 +6,13 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 
-contract NFTDoor is Ownable, VRFConsumerBaseV2, ERC721 {
 
+//TODO: make this re-usable. we allow uesr to create register new dynamic NFT as launchpad.
+//TODO: We need to handle metadata request from each contract
+contract NFTDoor is Ownable, VRFConsumerBaseV2, ERC721 {
   struct MintInfo {
-      address to;
-      uint256 tokenId;
+    address to;
+    uint256 tokenId;
   }
 
   event Minted(uint256 tokenId, uint256 randomNumber);
@@ -33,13 +35,19 @@ contract NFTDoor is Ownable, VRFConsumerBaseV2, ERC721 {
     uint64 subscriptionId,
     string memory name,
     string memory symbol,
+    string memory tokenBaseURI,
     uint256 mintLimit,
     uint256 mintPrice
   ) VRFConsumerBaseV2(vrfCoordinator) ERC721(name, symbol) {
     COORDINATOR = VRFCoordinatorV2Interface(vrfCoordinator);
     s_subscriptionId = subscriptionId;
+    _tokenBaseURI = tokenBaseURI;
     mintLimit = mintLimit;
     mintPrice = mintPrice;
+  }
+
+  function withdraw(address _recepient) public payable onlyOwner {
+    payable(_recepient).transfer(address(this).balance);
   }
 
   function requestRandomWords(address to, uint32 amount) public payable {
@@ -50,8 +58,8 @@ contract NFTDoor is Ownable, VRFConsumerBaseV2, ERC721 {
       requestConfirmations,
       callbackGasLimit,
       amount
-    ); 
-    for(uint256 i=0; i<amount; i++){
+    );
+    for (uint256 i = 0; i < amount; i++) {
       uint256 tokenId = totalSupply + i + 1;
       MintInfo memory mintInfo = MintInfo({to: to, tokenId: tokenId});
       requestIdToMintInfos[requestId].push(mintInfo);
@@ -59,10 +67,7 @@ contract NFTDoor is Ownable, VRFConsumerBaseV2, ERC721 {
     totalSupply = totalSupply + amount;
   }
 
-  function fulfillRandomWords(
-    uint256 requestId,
-    uint256[] memory randomWords
-  ) internal override {
+  function fulfillRandomWords(uint256 requestId, uint256[] memory randomWords) internal override {
     MintInfo[] memory mintInfos = requestIdToMintInfos[requestId];
     for (uint256 i = 0; i < mintInfos.length; i++) {
       MintInfo memory mintInfo = mintInfos[i];
@@ -72,7 +77,8 @@ contract NFTDoor is Ownable, VRFConsumerBaseV2, ERC721 {
     }
   }
 
-  function withdraw(address _recepient) public payable onlyOwner {
-    payable(_recepient).transfer(address(this).balance);
+  //TODO: We should have contract address in base uri
+  function _baseURI() internal pure override returns (string memory) {
+    return _tokenBaseURI;
   }
 }
