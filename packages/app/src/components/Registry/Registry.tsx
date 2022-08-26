@@ -1,6 +1,6 @@
-import { Box, Button, Input, Stack, Text } from "@chakra-ui/react";
-import { getContractAddress } from "@ethersproject/address";
-import { ContractFactory } from "ethers";
+import { Box, Button, Flex, FormControl, Image, Input, Stack, Text } from "@chakra-ui/react";
+import { ethers } from "ethers";
+import { id } from "ethers/lib/utils";
 import { doc, setDoc, updateDoc } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import React from "react";
@@ -17,38 +17,46 @@ export const Registry: React.FC = () => {
   const [keyImageToUpload, setKeyImageToUpload] = React.useState<File | null>(null);
   const [commonImageToUpload, setCommonImageToUpload] = React.useState<File | null>(null);
   const [rareImageToUpload, setRareImageToUpload] = React.useState<File | null>(null);
-  const [contractAddress, setContractAddress] = React.useState("");
-  const [keyVisualPath, setKeyVisualPath] = React.useState("");
-  const [name, setName] = React.useState("");
-  const [symbol, setSymbol] = React.useState("");
-  const [mintLimit, setMintLimit] = React.useState("");
-  const [gachaPrice, setGachaPrice] = React.useState("");
+
+  const [name, setName] = React.useState("Dynamic NFT with Chainlink VRF V2");
+  const [symbol, setSymbol] = React.useState("DNFT");
+  const [logo, setLogo] = React.useState(`${config.app.uri}/img/samples/gacha.png`);
+  const [totalSupply, setTotalSupply] = React.useState("1000");
+  const [price, setPrice] = React.useState("0.01");
+
   const [commonPercentage, setCommonPercentage] = React.useState(90);
   const [rarePercentage, setRarePercentage] = React.useState(10);
 
-  const deploy = async () => {
-    if (!signer || !name || !symbol || !keyVisualPath || !mintLimit || !gachaPrice) return;
+  const create = async () => {
+    if (!signer) {
+      return;
+    }
     const transactionCount = await signer.getTransactionCount();
     const address = await signer.getAddress();
-    const futureAddress = getContractAddress({
+    const computedDeployedContractAddress = ethers.utils.getContractAddress({
       from: address,
       nonce: transactionCount,
     });
-    setContractAddress(futureAddress);
-    const docRef = doc(firestore, "gachas", futureAddress);
+    const priceInWei = ethers.utils.parseEther(price).toString();
+    const docRef = doc(firestore, "dynamicNFTCollections", computedDeployedContractAddress);
     await setDoc(docRef, {
       creator: address,
-      contractAddress: futureAddress,
+      contractAddress: computedDeployedContractAddress,
       name,
       symbol,
-      keyVisual: keyVisualPath,
-      mintLimit: Number(mintLimit),
-      gachaPrice: Number(gachaPrice),
+      logo,
+      totalSupply,
+      priceInWei,
     });
-    const factory = new ContractFactory(NFTDoor_ABI, NFTDoor_bytecode, signer);
-    console.log(factory);
-    const tx = await factory.deploy(1591, name, symbol, `url/metadata/${futureAddress}/`, Number(mintLimit), "100000");
-    console.log(tx);
+    const factory = new ethers.ContractFactory(NFTDoor_ABI, NFTDoor_bytecode, signer);
+    const tx = await factory.deploy(
+      config.app.subscriptionId,
+      name,
+      symbol,
+      `${config.app.uri}/api/metadata/${computedDeployedContractAddress}/`,
+      totalSupply,
+      priceInWei
+    );
   };
 
   const upload = () => {
@@ -58,7 +66,7 @@ export const Registry: React.FC = () => {
       console.log("uploaded");
       getDownloadURL(imageRef).then((url) => {
         console.log(url);
-        setKeyVisualPath(url);
+        setLogo(url);
       });
     });
   };
@@ -86,115 +94,77 @@ export const Registry: React.FC = () => {
   };
 
   return (
-    <>
-      <Box boxShadow={"base"} borderRadius="2xl" p="4" backgroundColor={config.styles.background.color.main}>
-        <Stack spacing="4">
-          <ConnectWalletWrapper>
-            <Text>project name</Text>
-            <Input
-              onChange={(e) => {
-                setName(e.target.value);
-              }}
-              placeholder="BoredApeYatchClub"
-            ></Input>
-            <Text>symbol</Text>
-            <Input
-              onChange={(e) => {
-                setSymbol(e.target.value);
-              }}
-              placeholder="BAYC"
-            ></Input>
-            <Text>key visual</Text>
-            <Input
-              onChange={(event) => {
-                setKeyImageToUpload(event.target.files![0]);
-              }}
-              type="file"
-            ></Input>
-            <Button
-              w="full"
-              variant={config.styles.button.variant}
-              rounded={config.styles.button.rounded}
-              size={config.styles.button.size}
-              fontSize={config.styles.button.fontSize}
-              color={config.styles.text.color.primary}
-              onClick={upload}
-            >
-              Upload
-            </Button>
-            <Text>mint limit</Text>
-            <Input
-              onChange={(e) => {
-                setMintLimit(e.target.value);
-              }}
-              placeholder="1000"
-            ></Input>
+    <Box boxShadow={"base"} borderRadius="2xl" p="4" backgroundColor={config.styles.background.color.main}>
+      <Stack spacing="4">
+        <Text fontWeight="bold" fontSize="sm">
+          Create Dynamic NFT with Chainlink VRFV2
+        </Text>
+        <Text fontSize="xs">* Default data is set, but you can edit the data too.</Text>
+        <FormControl>
+          <Text mb="1" fontSize="sm" fontWeight="bold">
+            Name
+          </Text>
+          <Input
+            onChange={(e) => {
+              setName(e.target.value);
+            }}
+            value={name}
+          />
+        </FormControl>
+        <FormControl>
+          <Text mb="1" fontSize="sm" fontWeight="bold">
+            Symbol
+          </Text>
+          <Input
+            onChange={(e) => {
+              setSymbol(e.target.value);
+            }}
+            value={symbol}
+          />
+        </FormControl>
+        <FormControl>
+          <Text mb="4" fontSize="sm" fontWeight="bold">
+            Minting Page Logo
+          </Text>
+          <Flex justify={"center"}>
+            <Image src={logo} alt="minting page image" w="32" h="32" />
+          </Flex>
+        </FormControl>
 
-            <Text>gacha price (MATIC)</Text>
-            <Input
-              onChange={(e) => {
-                setGachaPrice(e.target.value);
-              }}
-              placeholder="0.1"
-            ></Input>
+        <FormControl>
+          <Text mb="1" fontSize="sm" fontWeight="bold">
+            Total Supply
+          </Text>
+          <Input
+            onChange={(e) => {
+              setTotalSupply(e.target.value);
+            }}
+            value={totalSupply}
+          />
+        </FormControl>
 
-            <Button
-              w="full"
-              variant={config.styles.button.variant}
-              rounded={config.styles.button.rounded}
-              size={config.styles.button.size}
-              fontSize={config.styles.button.fontSize}
-              color={config.styles.text.color.primary}
-              onClick={deploy}
-            >
-              Deploy Contract
-            </Button>
-          </ConnectWalletWrapper>
-        </Stack>
-      </Box>
-      <Box boxShadow={"base"} borderRadius="2xl" p="4" backgroundColor={config.styles.background.color.main}>
-        <Stack spacing="4">
-          <ConnectWalletWrapper>
-            <Text>Gacha Setting</Text>
-            <Text>Common %</Text>
-            <Input
-              onChange={(e) => {
-                setCommonPercentage(Number(e.target.value));
-                setRarePercentage(100 - Number(e.target.value));
-              }}
-              type="number"
-              placeholder="90"
-            ></Input>
-            <Text>Common visual</Text>
-            <Input
-              onChange={(event) => {
-                setCommonImageToUpload(event.target.files![0]);
-              }}
-              type="file"
-            ></Input>
-            <Text>Rare %</Text>
-            <Input disabled value={rarePercentage}></Input>
-            <Text>Rare visual</Text>
-            <Input
-              onChange={(event) => {
-                setRareImageToUpload(event.target.files![0]);
-              }}
-              type="file"
-            ></Input>
-            <Button
-              w="full"
-              variant={config.styles.button.variant}
-              rounded={config.styles.button.rounded}
-              size={config.styles.button.size}
-              fontSize={config.styles.button.fontSize}
-              color={config.styles.text.color.primary}
-              onClick={setGachaInfo}
-            >
-              Set NFT
-            </Button>
-          </ConnectWalletWrapper>
-        </Stack>
-      </Box>
-    </>
+        <Text mb="1" fontSize="sm" fontWeight="bold">
+          Price (MATIC)
+        </Text>
+        <Input
+          onChange={(e) => {
+            setPrice(e.target.value);
+          }}
+          value={price}
+        ></Input>
+
+        <Button
+          w="full"
+          variant={config.styles.button.variant}
+          rounded={config.styles.button.rounded}
+          size={config.styles.button.size}
+          fontSize={config.styles.button.fontSize}
+          color={config.styles.text.color.primary}
+          onClick={create}
+        >
+          Create
+        </Button>
+      </Stack>
+    </Box>
   );
 };
