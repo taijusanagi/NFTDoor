@@ -4,8 +4,8 @@ import { ContractFactory, ethers } from "ethers";
 import React from "react";
 import { useProvider, useSigner } from "wagmi";
 
-import NFTDoor from "../../../../contracts/artifacts/contracts/NFTDoor.sol/NFTDoor.json";
 import config from "../../../config.json";
+import { NFTDoor_ABI, NFTDoor_bytecode } from "../../lib/contracts/NFTDoor";
 import { ConnectWalletWrapper } from "../ConnectWalletWrapper";
 
 export const Main: React.FC = () => {
@@ -21,7 +21,7 @@ export const Main: React.FC = () => {
       nonce: transactionCount,
     });
     console.log(futureAddress);
-    const factory = new ContractFactory(NFTDoor.abi, NFTDoor.bytecode, signer);
+    const factory = new ContractFactory(NFTDoor_ABI, NFTDoor_bytecode, signer);
     console.log(factory);
     const tx = await factory.deploy(1591, "name", "symbol", `url/metadata/${futureAddress}/`, 100, "100000");
     console.log(tx);
@@ -31,7 +31,7 @@ export const Main: React.FC = () => {
     console.log("mint");
     if (!signer) return;
     const address = await signer.getAddress();
-    const mintContract = new ethers.Contract("0x4e90Ddc77aE2CA63d2083f20842a18ec8dDDd9E8", NFTDoor.abi, signer);
+    const mintContract = new ethers.Contract("0x4e90Ddc77aE2CA63d2083f20842a18ec8dDDd9E8", NFTDoor_ABI, signer);
     const tx = await mintContract.requestRandomWords(address, 1);
     await tx.wait();
     const filters = mintContract.filters["Minted"];
