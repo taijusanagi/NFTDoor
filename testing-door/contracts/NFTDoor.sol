@@ -22,7 +22,7 @@ contract NFTDoor is Ownable, VRFConsumerBaseV2, ERC721 {
 
   VRFCoordinatorV2Interface COORDINATOR;
   uint64 public s_subscriptionId;
-  address vrfCoordinator = 0x2eD832Ba664535e5886b75D64C46EB9a228C2610;
+  // address vrfCoordinator = 0x2eD832Ba664535e5886b75D64C46EB9a228C2610;
   bytes32 keyHash = 0x354d2f95da55398f44b7cff77da56283d9c6c829a4bdf1bbcaf2ad6a4d081f61;
   uint32 callbackGasLimit = 100000;
   uint16 requestConfirmations = 3;
@@ -34,6 +34,7 @@ contract NFTDoor is Ownable, VRFConsumerBaseV2, ERC721 {
   uint64 public _mintPrice;
 
   constructor(
+    address vrfCoordinator,
     uint64 subscriptionId,
     string memory name,
     string memory symbol,
