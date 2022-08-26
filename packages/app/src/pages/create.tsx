@@ -1,16 +1,16 @@
 import type { NextPage } from "next";
 
 import { Layout } from "../components/Layout";
-import { Registry as _Registry } from "../components/Registry";
+import { Create } from "../components/Main/Create";
 import { SEO } from "../components/SEO";
 
-const Registry: NextPage = () => {
+const CreatePage: NextPage = () => {
   return (
     <Layout>
       <SEO />
-      <_Registry />
+      <Create />
     </Layout>
   );
 };
 
-export default Registry;
+export default CreatePage;

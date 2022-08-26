@@ -34,6 +34,7 @@ export const ConnectWallet: React.FC<ConnectWalletProps> = ({ callback }) => {
               fontSize={config.styles.button.fontSize}
               color={config.styles.text.color.primary}
               onClick={() => connectWallet(key as WalletKey)}
+              shadow="md"
             >
               <Image src={`/img/icons/${wallet.icon}`} alt={key} w="4" mr="2" />
               {wallet.name}

@@ -2,7 +2,7 @@ import { Box, Fade, useDisclosure } from "@chakra-ui/react";
 import React from "react";
 import * as THREE from "three";
 
-import { sleep } from "../../lib/utils/sleep";
+import { sleep } from "../../../lib/utils/sleep";
 
 export interface ModelProps {
   image: string;

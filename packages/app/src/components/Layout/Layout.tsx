@@ -14,7 +14,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
     <Box backgroundColor={config.styles.background.color.layout}>
       <Flex minHeight={"100vh"} direction={"column"}>
         <Header />
-        <Container flex={1} maxWidth="xl" p="4">
+        <Container flex={1} maxWidth="2xl" p="4">
           <Stack spacing="4">{children}</Stack>
         </Container>
         <Footer />
