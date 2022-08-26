@@ -1,4 +1,4 @@
-import { collection, doc, getDoc } from "firebase/firestore";
+import { doc, getDoc } from "firebase/firestore";
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import React from "react";
@@ -14,15 +14,14 @@ const Gacha: NextPage = () => {
 
   React.useEffect(() => {
     const { contractAddress } = router.query;
+    if (!contractAddress) return;
     const docRef = doc(firestore, "gachas", contractAddress as string);
     getDoc(docRef).then((docSnap) => {
       if (docSnap.exists()) {
         setGacha(docSnap.data());
       }
     });
-
-    setGacha;
-  }, []);
+  }, [router]);
   return (
     <Layout>
       <SEO />

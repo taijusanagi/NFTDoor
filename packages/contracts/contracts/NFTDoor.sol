@@ -1,14 +1,14 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 
 //TODO: make this re-usable. we allow uesr to create register new dynamic NFT as launchpad.
 //TODO: We need to handle metadata request from each contract
-contract NFTDoor is Ownable, VRFConsumerBaseV2, ERC721 {
+contract NFTDoor is Ownable, VRFConsumerBaseV2, ERC721Enumerable {
   struct MintInfo {
     address to;
     uint256 tokenId;
@@ -29,7 +29,6 @@ contract NFTDoor is Ownable, VRFConsumerBaseV2, ERC721 {
 
   string private _baseTokenURI;
 
-  uint256 public totalSupply;
   uint256 public mintLimit;
   uint256 public mintPrice;
 
@@ -59,7 +58,7 @@ contract NFTDoor is Ownable, VRFConsumerBaseV2, ERC721 {
   }
 
   function requestRandomWords(address to, uint32 amount) public payable {
-    require(totalSupply + amount <= mintLimit, "NFTDoor: mint limit exceeded");
+    require(totalSupply() + amount <= mintLimit, "NFTDoor: mint limit exceeded");
     uint256 requestId = COORDINATOR.requestRandomWords(
       keyHash,
       s_subscriptionId,
@@ -68,11 +67,10 @@ contract NFTDoor is Ownable, VRFConsumerBaseV2, ERC721 {
       amount
     );
     for (uint256 i = 0; i < amount; i++) {
-      uint256 tokenId = totalSupply + i + 1;
+      uint256 tokenId = totalSupply() + i + 1;
       MintInfo memory mintInfo = MintInfo({to: to, tokenId: tokenId});
       requestIdToMintInfos[requestId].push(mintInfo);
     }
-    totalSupply = totalSupply + amount;
   }
 
   function fulfillRandomWords(uint256 requestId, uint256[] memory randomWords) internal override {

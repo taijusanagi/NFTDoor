@@ -1,17 +1,10 @@
-import { Box, Button, Image, Input, Stack, Text } from "@chakra-ui/react";
-import { getContractAddress } from "@ethersproject/address";
-import { ContractFactory, ethers } from "ethers";
-import { addDoc, collection, getDocs } from "firebase/firestore";
-import { ref, uploadBytes } from "firebase/storage";
-import NextLink from "next/link";
-import { useRouter } from "next/router";
+import { Box, Button, Stack } from "@chakra-ui/react";
+import { ethers } from "ethers";
 import React from "react";
-import { v4 } from "uuid";
 import { useProvider, useSigner } from "wagmi";
 
 import config from "../../../config.json";
-import { NFTDoor_ABI, NFTDoor_bytecode } from "../../lib/contracts/NFTDoor";
-import { firestore, storage } from "../../lib/firebase";
+import { NFTDoor_ABI } from "../../lib/contracts/NFTDoor";
 import { ConnectWalletWrapper } from "../ConnectWalletWrapper";
 
 export interface GachaProps {
@@ -25,7 +18,7 @@ export const Gacha: React.FC<GachaProps> = ({ gacha }) => {
   const mint = async () => {
     if (!signer) return;
     const address = await signer.getAddress();
-    const mintContract = new ethers.Contract("0x4e90Ddc77aE2CA63d2083f20842a18ec8dDDd9E8", NFTDoor_ABI, signer);
+    const mintContract = new ethers.Contract(gacha.contractAddress, NFTDoor_ABI, signer);
     const tx = await mintContract.requestRandomWords(address, 1);
     await tx.wait();
     const filters = mintContract.filters["Minted"];
