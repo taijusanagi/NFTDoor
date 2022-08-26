@@ -14,12 +14,12 @@ export const Common = Template.bind({});
 Common.args = {
   image: "/img/samples/common.png",
   effectVideo: "/img/samples/common.mp4",
-  delayTime: 2000,
+  delayTime: 1250,
 };
 
 export const Rare = Template.bind({});
 Rare.args = {
   image: "/img/samples/rare.png",
   effectVideo: "/img/samples/rare.mp4",
-  delayTime: 9250,
+  delayTime: 9000,
 };
