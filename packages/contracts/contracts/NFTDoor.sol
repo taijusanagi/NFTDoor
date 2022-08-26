@@ -38,13 +38,13 @@ contract NFTDoor is Ownable, VRFConsumerBaseV2, ERC721 {
     string memory name,
     string memory symbol,
     string memory baseTokenURI,
-    uint256 mintLimit,
-    uint256 mintPrice
+    uint256 _mintLimit,
+    uint256 _mintPrice
   ) VRFConsumerBaseV2(vrfCoordinator) ERC721(name, symbol) {
     COORDINATOR = VRFCoordinatorV2Interface(vrfCoordinator);
     s_subscriptionId = subscriptionId;
-    mintLimit = mintLimit;
-    mintPrice = mintPrice;
+    mintLimit = _mintLimit;
+    mintPrice = _mintPrice;
 
     setBaseTokenURI(baseTokenURI);
   }
