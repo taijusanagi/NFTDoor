@@ -1,4 +1,4 @@
-import { initializeApp } from "firebase/app";
+import { getApps, initializeApp } from "firebase/app";
 import { connectFirestoreEmulator, getFirestore } from "firebase/firestore";
 import { connectStorageEmulator, getStorage } from "firebase/storage";
 
@@ -12,8 +12,10 @@ const firebaseConfig = {
   measurementId: "G-6X609FPE1W",
 };
 
-const app = initializeApp(firebaseConfig);
-
+let app;
+if (getApps().length < 1) {
+  app = initializeApp(firebaseConfig);
+}
 const firestore = getFirestore(app);
 const storage = getStorage(app);
 
