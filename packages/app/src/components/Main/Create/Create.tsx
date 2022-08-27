@@ -2,32 +2,48 @@ import { Box, Button, Flex, FormControl, Image, Input, Link, Stack, Text } from 
 import { ethers } from "ethers";
 import { doc, setDoc } from "firebase/firestore";
 import React from "react";
-import { useSigner } from "wagmi";
+import { useNetwork, useSigner } from "wagmi";
 
 import config from "../../../../config.json";
+import { useIsMounted } from "../../../hooks/useIsMounted";
 import { NFTDoor_ABI, NFTDoor_bytecode } from "../../../lib/contracts/NFTDoor";
-import { firestore } from "../../../lib/firebase";
+import { firestore, tableName } from "../../../lib/firebase";
+import { DynamicNFT } from "../../../type/dynamic-nft";
 import { ConnectWalletWrapper } from "../../ConnectWalletWrapper";
+import { Viewer } from "../Viewer";
 
 export const Create: React.FC = () => {
+  const { chain } = useNetwork();
   const { data: signer } = useSigner();
 
   const [name, setName] = React.useState("Dynamic NFT with Chainlink VRF V2");
   const [symbol, setSymbol] = React.useState("DNFT");
-  const [logo, setLogo] = React.useState(`${config.app.uri}/img/samples/gacha.png`);
+  const [totalSupply, setTotalSupply] = React.useState("1000");
+  const [price, setPrice] = React.useState("0.01");
 
+  /*
+   * @dev contents edit is not implemented yet
+   */
+  const [logo, setLogo] = React.useState(`${config.app.uri}/img/samples/gacha.png`);
   const [commonImage, setCommonImage] = React.useState(`${config.app.uri}/img/samples/common.png`);
   const [rareImage, setRareImage] = React.useState(`${config.app.uri}/img/samples/rare.png`);
   const [commonVideo, setCommonVideo] = React.useState(`${config.app.uri}/img/samples/common.mp4`);
   const [rareVideo, setRareVideo] = React.useState(`${config.app.uri}/img/samples/rare.mp4`);
-
-  const [totalSupply, setTotalSupply] = React.useState("1000");
-  const [price, setPrice] = React.useState("0.01");
-
+  const [commonVideoDelayTime, setCommonVideoDelayTime] = React.useState(1250);
+  const [rareVideoDelayTime, setRareVideoDelayTime] = React.useState(9000);
   const [commonPercentage, setCommonPercentage] = React.useState(70);
 
+  const { isMounted } = useIsMounted();
+
+  const percantageBase = 100;
+
   const create = async () => {
-    if (!signer) {
+    if (!chain || !signer) {
+      return;
+    }
+    const connectedChainId = chain.id;
+    if (config.app.chainId !== connectedChainId) {
+      alert("please connect to polygon mumbai");
       return;
     }
     const transactionCount = await signer.getTransactionCount();
@@ -37,8 +53,10 @@ export const Create: React.FC = () => {
       nonce: transactionCount,
     });
     const priceInWei = ethers.utils.parseEther(price).toString();
-    const docRef = doc(firestore, "dynamicNFTCollections", computedDeployedContractAddress);
-    await setDoc(docRef, {
+    const docRef = doc(firestore, tableName, computedDeployedContractAddress);
+
+    const rarePercentage = percantageBase - commonPercentage;
+    const dynamicNFT: DynamicNFT = {
       creator: address,
       contractAddress: computedDeployedContractAddress,
       name,
@@ -46,7 +64,12 @@ export const Create: React.FC = () => {
       logo,
       totalSupply,
       priceInWei,
-    });
+      contents: [
+        { percentage: commonPercentage, image: commonImage, video: commonVideo, videDelayTime: commonVideoDelayTime },
+        { percentage: rarePercentage, image: rareImage, video: rareVideo, videDelayTime: rareVideoDelayTime },
+      ],
+    };
+    await setDoc(docRef, dynamicNFT);
     const factory = new ethers.ContractFactory(NFTDoor_ABI, NFTDoor_bytecode, signer);
     const tx = await factory.deploy(
       config.app.subscriptionId,
@@ -64,10 +87,20 @@ export const Create: React.FC = () => {
         <Text fontSize="sm" color="blue.400" fontWeight={"bold"}>
           <Link href="/">{`> Home`}</Link>
         </Text>
-        <Text fontWeight="bold">Create Dynamic NFT</Text>
-        <Text fontSize="xs">* Default data is set, but you can edit the data too.</Text>
+        <Text fontWeight="bold" color={config.styles.text.color.primary}>
+          Create Dynamic NFT
+        </Text>
+        <Text fontSize="xs" color={config.styles.text.color.secondary}>
+          * Please connext to Polygon Mumbai.
+        </Text>
+        <Text fontSize="xs" color={config.styles.text.color.secondary}>
+          * Default data is set, for the better demo.
+        </Text>
+        <Text fontSize="xs" color={config.styles.text.color.secondary}>
+          * Contents and rarity edit will be implemented later.
+        </Text>
         <FormControl>
-          <Text mb="1" fontSize="sm" fontWeight="bold">
+          <Text mb="1" fontSize="sm" fontWeight="bold" color={config.styles.text.color.primary}>
             Name
           </Text>
           <Input
@@ -78,7 +111,7 @@ export const Create: React.FC = () => {
           />
         </FormControl>
         <FormControl>
-          <Text mb="1" fontSize="sm" fontWeight="bold">
+          <Text mb="1" fontSize="sm" fontWeight="bold" color={config.styles.text.color.primary}>
             Symbol
           </Text>
           <Input
@@ -89,7 +122,7 @@ export const Create: React.FC = () => {
           />
         </FormControl>
         <FormControl>
-          <Text mb="4" fontSize="sm" fontWeight="bold">
+          <Text mb="4" fontSize="sm" fontWeight="bold" color={config.styles.text.color.primary}>
             Minting Page Logo
           </Text>
           <Flex justify={"center"}>
@@ -97,7 +130,7 @@ export const Create: React.FC = () => {
           </Flex>
         </FormControl>
         <FormControl>
-          <Text mb="1" fontSize="sm" fontWeight="bold">
+          <Text mb="1" fontSize="sm" fontWeight="bold" color={config.styles.text.color.primary}>
             Total Supply
           </Text>
           <Input
@@ -108,7 +141,7 @@ export const Create: React.FC = () => {
           />
         </FormControl>
         <FormControl>
-          <Text mb="1" fontSize="sm" fontWeight="bold">
+          <Text mb="1" fontSize="sm" fontWeight="bold" color={config.styles.text.color.primary}>
             Price (MATIC)
           </Text>
           <Input
@@ -118,39 +151,26 @@ export const Create: React.FC = () => {
             value={price}
           />
         </FormControl>
-
-        <Stack spacing="8" p="8">
+        <Stack spacing="8">
           <FormControl>
-            <Flex justify="space-between">
-              <Box w="full">
-                <Flex justify={"center"}>
-                  <Image src={commonImage} alt="minting page image" w="32" h="32" />
-                </Flex>
-              </Box>
-              <Box w="full">
-                <Flex justify={"center"}>
-                  <Box as="video" position="absolute" h="32" controls muted objectFit="fill">
-                    <source type="video/mp4" src={commonVideo}></source>
-                  </Box>
-                </Flex>
-              </Box>
-            </Flex>
+            <Text mb="4" fontSize="sm" fontWeight="bold" color={config.styles.text.color.primary}>
+              Common Item (70%)
+            </Text>
+            {isMounted && (
+              <Flex justify="center">
+                <Viewer image={commonImage} effectVideo={commonVideo} delayTime={2000} isReplayable={true} />
+              </Flex>
+            )}
           </FormControl>
           <FormControl>
-            <Flex justify="space-between">
-              <Box w="full">
-                <Flex justify={"center"}>
-                  <Image src={rareImage} alt="minting page image" w="32" h="32" />
-                </Flex>
-              </Box>
-              <Box w="full">
-                <Flex justify={"center"}>
-                  <Box as="video" position="absolute" h="32" controls muted objectFit="fill">
-                    <source type="video/mp4" src={rareVideo}></source>
-                  </Box>
-                </Flex>
-              </Box>
-            </Flex>
+            <Text mb="4" fontSize="sm" fontWeight="bold" color={config.styles.text.color.primary}>
+              Rare Item (30%)
+            </Text>
+            {isMounted && (
+              <Flex justify="center">
+                <Viewer image={rareImage} effectVideo={rareVideo} delayTime={9000} isReplayable={true} />
+              </Flex>
+            )}
           </FormControl>
         </Stack>
         <ConnectWalletWrapper>

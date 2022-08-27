@@ -6,7 +6,7 @@ import { SEO } from "../components/SEO";
 
 const CreatePage: NextPage = () => {
   return (
-    <Layout>
+    <Layout containerProps={{ maxW: "md" }}>
       <SEO />
       <Create />
     </Layout>

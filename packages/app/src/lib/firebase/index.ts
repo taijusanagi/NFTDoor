@@ -12,8 +12,10 @@ const firebaseConfig = {
   measurementId: "G-6X609FPE1W",
 };
 
+const tableName = "dynamicNFTCollections";
+
 let app;
-if (getApps().length < 1) {
+if (getApps().length === 0) {
   app = initializeApp(firebaseConfig);
 }
 const firestore = getFirestore(app);
@@ -26,4 +28,4 @@ if (typeof window !== "undefined") {
   }
 }
 
-export { firestore, storage };
+export { firestore, storage, tableName };

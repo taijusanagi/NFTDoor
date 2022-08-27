@@ -33,7 +33,7 @@ export const ConnectWalletWrapper: React.FC<ConnectWalletWrapperProps> = ({ chil
         </Box>
       )}
       {isWagmiConnected && <Box>{children}</Box>}
-      <Modal onClose={onClose} isOpen={isOpen}>
+      <Modal onClose={onClose} isOpen={isOpen} header="Connect Wallet">
         <ConnectWallet callback={onClose} />
       </Modal>
     </Box>

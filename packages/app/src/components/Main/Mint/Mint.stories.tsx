@@ -1,13 +1,13 @@
 import { ComponentMeta, ComponentStory } from "@storybook/react";
 import React from "react";
 
-import { Gacha as Component } from "./Gacha";
+import { Mint as Component } from "./Mint";
 
 export default {
-  title: "Components/Gacha",
+  title: "Components/Mint",
   component: Component,
 } as ComponentMeta<typeof Component>;
 
 const Template: ComponentStory<typeof Component> = (args) => <Component {...args} />;
 
-export const Gacha = Template.bind({});
+export const Mint = Template.bind({});

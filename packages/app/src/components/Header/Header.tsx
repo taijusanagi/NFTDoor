@@ -1,4 +1,4 @@
-import { Box, Flex, Text } from "@chakra-ui/react";
+import { Box, Flex, Link, Text } from "@chakra-ui/react";
 import React from "react";
 
 import config from "../../../config.json";
@@ -10,7 +10,7 @@ export const Header: React.FC = () => {
     <Box p="4" as="header">
       <Flex justify="space-between" align="center">
         <Text fontWeight={"bold"} color={config.styles.text.color}>
-          {config.app.name}
+          <Link href="/">{config.app.name}</Link>
         </Text>
         <ConnectWalletWrapper>
           <Wallet />
