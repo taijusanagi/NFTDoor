@@ -71,7 +71,6 @@ export const Create: React.FC = () => {
       const factory = new ethers.ContractFactory(NFTDoorArtifact.abi, NFTDoorArtifact.bytecode, signer);
       console.log("deploying contract...");
       console.log(`${config.app.uri}/api/metadata/${computedDeployedContractAddress}/`);
-      return;
       const deployed = await factory.deploy(
         coordinatorAddress,
         subscription,
