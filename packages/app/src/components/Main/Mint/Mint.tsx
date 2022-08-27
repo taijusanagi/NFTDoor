@@ -7,9 +7,8 @@ import React from "react";
 import { useProvider, useSigner } from "wagmi";
 
 import config from "../../../../config.json";
-import { NFTDoor_ABI } from "../../../lib/contracts/NFTDoor";
+import NFTDoorArtifact from "../../../lib/contracts/NFTDoor.json";
 import { firestore, tableName } from "../../../lib/firebase/web";
-import { sleep } from "../../../lib/utils/sleep";
 import { DynamicNFT } from "../../../type/dynamic-nft";
 import { ConnectWalletWrapper } from "../../ConnectWalletWrapper";
 import { Modal } from "../../Modal";
@@ -48,33 +47,36 @@ export const Mint: React.FC = () => {
       return;
     }
     setIsLoading(true);
-    const tokenId = "0";
-
-    await sleep(3000);
-
-    // const address = await signer.getAddress();
-    // const mintContract = new ethers.Contract(dynamicNFT.contractAddress, NFTDoor_ABI, signer);
-    // const tx = await mintContract.requestRandomWords(address, 1);
-    // await tx.wait();
-    // const filters = mintContract.filters["Minted"];
-    // if (filters !== undefined) {
-    //   provider.once("block", () => {
-    //     mintContract.on(filters(), () => {
-    //       console.log("minted");
-    //     });
-    //   });
-    // }\
-
-    const { data } = await axios.get(`/api/metadata/${contractAddress}/${tokenId}`);
-    const image = data.image;
-    const video = data.video;
-    const delayTime = data.delayTime;
-    setTokenId(tokenId);
-    setImage(image);
-    setEffectVideo(video);
-    setDelayTime(delayTime);
-    onOpen();
-    setIsLoading(false);
+    try {
+      const address = await signer.getAddress();
+      const mintContract = new ethers.Contract(dynamicNFT.contractAddress, NFTDoorArtifact.abi, signer);
+      console.log("requesting minting tx...");
+      const tx = await mintContract.requestRandomWords(address, 1);
+      console.log("tx sent, waiting for confirmation...");
+      const receipt = await tx.wait();
+      const mintingTokenId = receipt.events[1].args.tokenId.toString();
+      console.log("tx confirmed, expected token id:", mintingTokenId);
+      console.log("waiting chainlink vrf v2 callback");
+      const filters = mintContract.filters.Minted(mintingTokenId);
+      mintContract.on(filters, async (tokenId) => {
+        const mintedTokenId = tokenId.toString();
+        console.log("callback recieved confirmed. minted:", tokenId);
+        console.log("start calculate nft rarity using chainlink vrf random number...");
+        const { data } = await axios.get(`/api/metadata/${contractAddress}/${mintedTokenId}`);
+        console.log("calculated", data);
+        const image = data.image;
+        const video = data.video;
+        const delayTime = data.delayTime;
+        setTokenId(tokenId);
+        setImage(image);
+        setEffectVideo(video);
+        setDelayTime(delayTime);
+        onOpen();
+        setIsLoading(false);
+      });
+    } catch (e) {
+      setIsLoading(false);
+    }
   };
 
   return (
