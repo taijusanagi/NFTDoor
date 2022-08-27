@@ -5,7 +5,9 @@
       "short": "Dynamic NFT launchpad with Chainlink VRFv2",
       "long": "NFTDoor is dynamic NFT launchpad powered by Chainlink VRFv2, creators can create and sell dynamic NFT very easily."
     },
-    "uri": "https://nftdoor.vercel.app/"
+    "uri": "https://nftdoor.vercel.app",
+    "chainId": 80001,
+    "subscriptionId": 1591
   },
   "links": {
     "github": {

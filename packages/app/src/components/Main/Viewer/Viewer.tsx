@@ -1,18 +1,23 @@
-import { Box, Fade, useDisclosure } from "@chakra-ui/react";
+import { Box, Button, Fade, useDisclosure } from "@chakra-ui/react";
 import React from "react";
+import { MdReplay } from "react-icons/md";
 import * as THREE from "three";
 
-import { sleep } from "../../lib/utils/sleep";
+import { sleep } from "../../../lib/utils/sleep";
 
 export interface ModelProps {
   image: string;
   effectVideo: string;
   delayTime: number;
   size?: number;
+  isReplayable?: boolean;
 }
 
-export const Viewer: React.FC<ModelProps> = ({ image, effectVideo, delayTime, size = 300 }) => {
-  const { isOpen, onOpen } = useDisclosure();
+export const Viewer: React.FC<ModelProps> = ({ image, effectVideo, delayTime, size = 240, isReplayable }) => {
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
+  const canvasRef = React.useRef(null);
+  const vidRef = React.useRef<any>();
 
   const scene = React.useMemo(() => {
     return new THREE.Scene();
@@ -21,7 +26,7 @@ export const Viewer: React.FC<ModelProps> = ({ image, effectVideo, delayTime, si
   React.useEffect(() => {
     sleep(delayTime).then(() => {
       onOpen();
-      const canvas = document.getElementById("canvas");
+      const canvas = canvasRef.current;
       if (!canvas) {
         return;
       }
@@ -66,20 +71,31 @@ export const Viewer: React.FC<ModelProps> = ({ image, effectVideo, delayTime, si
     });
   }, [onOpen, delayTime, image, scene, size]);
 
-  const vidRef = React.useRef<any>();
-
   React.useEffect(() => {
     vidRef.current?.play();
   }, []);
 
+  const replay = async () => {
+    vidRef.current.currentTime = 0;
+    vidRef.current.play();
+    onClose();
+    await sleep(delayTime);
+    onOpen();
+  };
+
   return (
-    <Box position="relative">
+    <Box position="relative" w={size} h={size}>
       <Box as="video" position="absolute" w={size} h={size} autoPlay muted ref={vidRef} objectFit="fill">
         <source type="video/mp4" src={effectVideo}></source>
       </Box>
       <Fade in={isOpen}>
-        <Box as="canvas" id="canvas" position="absolute" zIndex="100" w={size} h={size} />
+        <Box as="canvas" ref={canvasRef} position="absolute" zIndex="100" w={size} h={size} />
       </Fade>
+      {isReplayable && (
+        <Button right="0" position="absolute" zIndex={"100"} m="1" fontSize="xs" size="xs" onClick={replay}>
+          <MdReplay />
+        </Button>
+      )}
     </Box>
   );
 };

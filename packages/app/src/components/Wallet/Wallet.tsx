@@ -17,6 +17,7 @@ export const Wallet: React.FC = () => {
         fontSize={config.styles.button.fontSize}
         color={config.styles.text.color.primary}
         onClick={() => disconnect()}
+        shadow="md"
       >
         Disconnect
       </Button>

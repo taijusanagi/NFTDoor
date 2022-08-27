@@ -1,13 +1,13 @@
 import { ComponentMeta, ComponentStory } from "@storybook/react";
 import React from "react";
 
-import { Registry as Component } from "./Registry";
+import { Create as Component } from "./Create";
 
 export default {
-  title: "Components/Registry",
+  title: "Components/Create",
   component: Component,
 } as ComponentMeta<typeof Component>;
 
 const Template: ComponentStory<typeof Component> = (args) => <Component {...args} />;
 
-export const Registry = Template.bind({});
+export const Create = Template.bind({});

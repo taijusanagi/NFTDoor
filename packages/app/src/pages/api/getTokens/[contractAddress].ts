@@ -30,7 +30,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
   const tokenByIndexResult = await multicallProvider.all(tokenByIndexMulcicalls);
   tokenIds = tokenByIndexResult;
-  //TODO: use registered name and description
   const metadata = {
     tokenIds,
   };
