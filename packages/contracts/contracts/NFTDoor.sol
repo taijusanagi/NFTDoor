@@ -69,6 +69,7 @@ contract NFTDoor is Ownable, VRFConsumerBaseV2, ERC721Enumerable {
       callbackGasLimit,
       amount
     );
+
     for (uint256 i = 0; i < amount; i++) {
       uint256 tokenId = totalSupply() + i + 1;
       MintInfo memory mintInfo = MintInfo({to: to, tokenId: tokenId});

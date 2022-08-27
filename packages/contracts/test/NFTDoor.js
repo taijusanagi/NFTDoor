@@ -4,6 +4,11 @@ const { network } = require("hardhat");
 const { expect } = require("chai");
 const hre = require("hardhat");
 
+/*
+ * @dev: should use mumbai specific setting for chainlink integration
+ *       https://docs.chain.link/docs/vrf/v2/supported-networks/#polygon-matic-mumbai-testnet
+ */
+
 describe("NFTDoor", function () {
   let nftDoorContract, mockVRFCoordinatorV2, owner, other;
   const name = "NFTDoor";
@@ -12,30 +17,29 @@ describe("NFTDoor", function () {
   const mintLimit = 10;
   const mintPrice = 1;
 
-  const subscriptionId = 1582;
-  const keyHash = "0x354d2f95da55398f44b7cff77da56283d9c6c829a4bdf1bbcaf2ad6a4d081f61";
+  const subscriptionId = 1610;
+  const keyHash = "0x4b09e658ed251bcafeebbc69400383d49f344ace09b9576fe248bb02c003fe9f"; //
   const callbackGasLimit = 100000;
   const requestConfirmations = 3;
-  let coordinatorAddress = "";
 
   beforeEach(async function () {
     const NFTDoor = await hre.ethers.getContractFactory("NFTDoor");
+    const MockVRFCoordinatorV2 = await hre.ethers.getContractFactory("MockVRFCoordinatorV2");
 
     /*
      * @dev: if target network is mumbai, using mumbai coordinator for integration test
      *       if target network is other than mumbai, mock coordinator to unit test
      */
     if (network.name === "mumbai") {
-      coordinatorAddress = "0x7a1BaC17Ccc5b313516C5E16fb24f7659aA5ebed";
+      const coordinatorAddress = "0x7a1BaC17Ccc5b313516C5E16fb24f7659aA5ebed";
+      mockVRFCoordinatorV2 = await MockVRFCoordinatorV2.attach(coordinatorAddress);
     } else {
-      const MockVRFCoordinatorV2 = await hre.ethers.getContractFactory("MockVRFCoordinatorV2");
       mockVRFCoordinatorV2 = await MockVRFCoordinatorV2.deploy();
-      coordinatorAddress = mockVRFCoordinatorV2.address;
     }
 
     [owner, other, ...addrs] = await hre.ethers.getSigners();
     nftDoorContract = await NFTDoor.deploy(
-      coordinatorAddress,
+      mockVRFCoordinatorV2.address,
       subscriptionId,
       keyHash,
       callbackGasLimit,
@@ -46,13 +50,17 @@ describe("NFTDoor", function () {
       mintLimit,
       mintPrice
     );
+
+    if (network.name === "mumbai") {
+      await mockVRFCoordinatorV2.addConsumer(subscriptionId, nftDoorContract.address);
+    }
   });
 
   it("Deployed", async function () {
     expect(await nftDoorContract.name()).to.equal(name);
     expect(await nftDoorContract.symbol()).to.equal(symbol);
     expect(await nftDoorContract.s_subscriptionId()).to.be.equal(subscriptionId);
-    expect(await nftDoorContract.COORDINATOR()).to.be.equal(coordinatorAddress);
+    expect(await nftDoorContract.COORDINATOR()).to.be.equal(mockVRFCoordinatorV2.address);
     expect(await nftDoorContract.keyHash()).to.be.equal(keyHash);
     expect(await nftDoorContract.callbackGasLimit()).to.be.equal(callbackGasLimit);
     expect(await nftDoorContract.requestConfirmations()).to.be.equal(requestConfirmations);
