@@ -1,4 +1,5 @@
 import { Box, Button, Flex, FormControl, Image, Input, Link, Stack, Text } from "@chakra-ui/react";
+import axios from "axios";
 import { ethers } from "ethers";
 import { doc, setDoc } from "firebase/firestore";
 import { useRouter } from "next/router";
@@ -7,7 +8,14 @@ import { useNetwork, useSigner } from "wagmi";
 
 import config from "../../../../config.json";
 import { useIsMounted } from "../../../hooks/useIsMounted";
-import { NFTDoor_ABI, NFTDoor_bytecode } from "../../../lib/contracts/NFTDoor";
+import {
+  callbackGasLimit,
+  coordinatorAddress,
+  keyHash,
+  requestConfirmations,
+  subscription,
+} from "../../../lib/contracts/config";
+import NFTDoorArtifact from "../../../lib/contracts/NFTDoor.json";
 import { firestore, tableName } from "../../../lib/firebase/web";
 import { DynamicNFT } from "../../../type/dynamic-nft";
 import { ConnectWalletWrapper } from "../../ConnectWalletWrapper";
@@ -59,17 +67,28 @@ export const Create: React.FC = () => {
         from: address,
         nonce: transactionCount,
       });
-
       const priceInWei = ethers.utils.parseEther(price).toString();
-      const factory = new ethers.ContractFactory(NFTDoor_ABI, NFTDoor_bytecode, signer);
-      await factory.deploy(
-        config.app.subscriptionId,
+      const factory = new ethers.ContractFactory(NFTDoorArtifact.abi, NFTDoorArtifact.bytecode, signer);
+      console.log("deploying contract...");
+      console.log(`${config.app.uri}/api/metadata/${computedDeployedContractAddress}/`);
+      return;
+      const deployed = await factory.deploy(
+        coordinatorAddress,
+        subscription,
+        keyHash,
+        callbackGasLimit,
+        requestConfirmations,
         name,
         symbol,
         `${config.app.uri}/api/metadata/${computedDeployedContractAddress}/`,
         totalSupply,
         priceInWei
       );
+      console.log("contract deployed", deployed.address);
+      console.log("adding consumer...");
+      const { data } = await axios.post(`/api/addConsumer/${deployed.address}`);
+      console.log("added consumer", data.hash);
+
       const docRef = doc(firestore, tableName, computedDeployedContractAddress);
       const rarePercentage = percantageBase - commonPercentage;
       const dynamicNFT: DynamicNFT = {

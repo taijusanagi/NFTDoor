@@ -13,6 +13,7 @@ contract NFTDoor is Ownable, VRFConsumerBaseV2, ERC721Enumerable {
   }
 
   event BaseTokenURISet(string baseTokenURI);
+  event Requested(uint256 indexed tokenId);
   event Minted(uint256 indexed tokenId, uint256 randomNumber);
 
   mapping(uint256 => MintInfo[]) public requestIdToMintInfos;
@@ -47,7 +48,6 @@ contract NFTDoor is Ownable, VRFConsumerBaseV2, ERC721Enumerable {
     requestConfirmations = _requestConfirmations;
     mintLimit = _mintLimit;
     mintPrice = _mintPrice;
-
     setBaseTokenURI(baseTokenURI);
   }
 
@@ -69,11 +69,11 @@ contract NFTDoor is Ownable, VRFConsumerBaseV2, ERC721Enumerable {
       callbackGasLimit,
       amount
     );
-
     for (uint256 i = 0; i < amount; i++) {
       uint256 tokenId = totalSupply() + i + 1;
       MintInfo memory mintInfo = MintInfo({to: to, tokenId: tokenId});
       requestIdToMintInfos[requestId].push(mintInfo);
+      emit Requested(tokenId);
     }
   }
 

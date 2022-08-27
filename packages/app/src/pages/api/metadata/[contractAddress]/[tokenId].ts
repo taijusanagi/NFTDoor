@@ -1,7 +1,8 @@
 import { ethers } from "ethers";
 import type { NextApiRequest, NextApiResponse } from "next";
 
-import { NFTDoor_ABI } from "../../../../lib/contracts/NFTDoor";
+import { rpc } from "../../../../lib/contracts/config";
+import NFTDoorArtifact from "../../../../lib/contracts/NFTDoor.json";
 import { firestore, tableName } from "../../../../lib/firebase/admin";
 import { DynamicNFT } from "../../../../type/dynamic-nft";
 
@@ -26,10 +27,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   docData = docData as DynamicNFT;
   let randomNumber;
   if (!docData.tokenIdToRandomNumber?.[tokenId]) {
-    const provider = new ethers.providers.JsonRpcProvider(
-      "https://polygon-mumbai.g.alchemy.com/v2/b4EX5QswzzC4XN0hj2KHxQMHNXQqvA7T"
-    );
-    const contract = new ethers.Contract(contractAddress, NFTDoor_ABI, provider);
+    const provider = new ethers.providers.JsonRpcProvider(rpc);
+    const contract = new ethers.Contract(contractAddress, NFTDoorArtifact.abi, provider);
     // randomNumber = await contract.tokenIdToRandomNumber(tokenId);
     randomNumber = "1";
     if (ethers.BigNumber.from(randomNumber).eq(0)) {
