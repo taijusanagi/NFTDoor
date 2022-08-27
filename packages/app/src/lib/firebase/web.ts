@@ -2,6 +2,8 @@ import { getApps, initializeApp } from "firebase/app";
 import { connectFirestoreEmulator, getFirestore } from "firebase/firestore";
 import { connectStorageEmulator, getStorage } from "firebase/storage";
 
+import { tableName } from "./common";
+
 const firebaseConfig = {
   apiKey: "AIzaSyCtynt3MEKh1l3R-ZimdHeX1rqC0X2YDnw",
   authDomain: "nftdoor-193e9.firebaseapp.com",
@@ -11,8 +13,6 @@ const firebaseConfig = {
   appId: "1:499623123743:web:66af94b38040654168ae2a",
   measurementId: "G-6X609FPE1W",
 };
-
-const tableName = "dynamicNFTCollections";
 
 let app;
 if (getApps().length === 0) {

@@ -3,7 +3,7 @@ import { collection, getDocs } from "@firebase/firestore";
 import React from "react";
 
 import config from "../../../config.json";
-import { firestore, tableName } from "../../lib/firebase";
+import { firestore, tableName } from "../../lib/firebase/web";
 import { DynamicNFT } from "../../type/dynamic-nft";
 
 export const Main: React.FC = () => {

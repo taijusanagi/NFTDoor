@@ -1,5 +1,6 @@
 import { Box, Button, Flex, HStack, Image, Link, Skeleton, Stack, Text, useDisclosure } from "@chakra-ui/react";
 import { doc, getDoc } from "@firebase/firestore";
+import axios from "axios";
 import { ethers } from "ethers";
 import { useRouter } from "next/router";
 import React from "react";
@@ -7,7 +8,7 @@ import { useProvider, useSigner } from "wagmi";
 
 import config from "../../../../config.json";
 import { NFTDoor_ABI } from "../../../lib/contracts/NFTDoor";
-import { firestore, tableName } from "../../../lib/firebase";
+import { firestore, tableName } from "../../../lib/firebase/web";
 import { sleep } from "../../../lib/utils/sleep";
 import { DynamicNFT } from "../../../type/dynamic-nft";
 import { ConnectWalletWrapper } from "../../ConnectWalletWrapper";
@@ -42,13 +43,15 @@ export const Mint: React.FC = () => {
   }, [router]);
 
   const mint = async () => {
-    if (!signer || !dynamicNFT) {
+    const { contractAddress } = router.query;
+    if (!signer || !dynamicNFT || !contractAddress) {
       return;
     }
     setIsLoading(true);
     const tokenId = "0";
 
     await sleep(3000);
+
     // const address = await signer.getAddress();
     // const mintContract = new ethers.Contract(dynamicNFT.contractAddress, NFTDoor_ABI, signer);
     // const tx = await mintContract.requestRandomWords(address, 1);
@@ -62,12 +65,13 @@ export const Mint: React.FC = () => {
     //   });
     // }\
 
-    const image = "/img/samples/common.png";
-    const effectVideo = "/img/samples/common.mp4";
-    const delayTime = 1250;
+    const { data } = await axios.get(`/api/metadata/${contractAddress}/${tokenId}`);
+    const image = data.image;
+    const video = data.video;
+    const delayTime = data.delayTime;
     setTokenId(tokenId);
     setImage(image);
-    setEffectVideo(effectVideo);
+    setEffectVideo(video);
     setDelayTime(delayTime);
     onOpen();
     setIsLoading(false);

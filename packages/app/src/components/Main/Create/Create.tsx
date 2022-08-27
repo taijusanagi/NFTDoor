@@ -1,13 +1,14 @@
 import { Box, Button, Flex, FormControl, Image, Input, Link, Stack, Text } from "@chakra-ui/react";
 import { ethers } from "ethers";
 import { doc, setDoc } from "firebase/firestore";
+import { useRouter } from "next/router";
 import React from "react";
 import { useNetwork, useSigner } from "wagmi";
 
 import config from "../../../../config.json";
 import { useIsMounted } from "../../../hooks/useIsMounted";
 import { NFTDoor_ABI, NFTDoor_bytecode } from "../../../lib/contracts/NFTDoor";
-import { firestore, tableName } from "../../../lib/firebase";
+import { firestore, tableName } from "../../../lib/firebase/web";
 import { DynamicNFT } from "../../../type/dynamic-nft";
 import { ConnectWalletWrapper } from "../../ConnectWalletWrapper";
 import { Viewer } from "../Viewer";
@@ -15,6 +16,9 @@ import { Viewer } from "../Viewer";
 export const Create: React.FC = () => {
   const { chain } = useNetwork();
   const { data: signer } = useSigner();
+  const router = useRouter();
+
+  const [isLoading, setIsLoading] = React.useState(false);
 
   const [name, setName] = React.useState("Dynamic NFT with Chainlink VRF V2");
   const [symbol, setSymbol] = React.useState("DNFT");
@@ -41,44 +45,51 @@ export const Create: React.FC = () => {
     if (!chain || !signer) {
       return;
     }
-    const connectedChainId = chain.id;
-    if (config.app.chainId !== connectedChainId) {
-      alert("please connect to polygon mumbai");
-      return;
-    }
-    const transactionCount = await signer.getTransactionCount();
-    const address = await signer.getAddress();
-    const computedDeployedContractAddress = ethers.utils.getContractAddress({
-      from: address,
-      nonce: transactionCount,
-    });
-    const priceInWei = ethers.utils.parseEther(price).toString();
-    const docRef = doc(firestore, tableName, computedDeployedContractAddress);
+    setIsLoading(true);
+    try {
+      const connectedChainId = chain.id;
+      if (config.app.chainId !== connectedChainId) {
+        alert("please connect to polygon mumbai");
+        return;
+      }
 
-    const rarePercentage = percantageBase - commonPercentage;
-    const dynamicNFT: DynamicNFT = {
-      creator: address,
-      contractAddress: computedDeployedContractAddress,
-      name,
-      symbol,
-      logo,
-      totalSupply,
-      priceInWei,
-      contents: [
-        { percentage: commonPercentage, image: commonImage, video: commonVideo, videDelayTime: commonVideoDelayTime },
-        { percentage: rarePercentage, image: rareImage, video: rareVideo, videDelayTime: rareVideoDelayTime },
-      ],
-    };
-    await setDoc(docRef, dynamicNFT);
-    const factory = new ethers.ContractFactory(NFTDoor_ABI, NFTDoor_bytecode, signer);
-    const tx = await factory.deploy(
-      config.app.subscriptionId,
-      name,
-      symbol,
-      `${config.app.uri}/api/metadata/${computedDeployedContractAddress}/`,
-      totalSupply,
-      priceInWei
-    );
+      const transactionCount = await signer.getTransactionCount();
+      const address = await signer.getAddress();
+      const computedDeployedContractAddress = ethers.utils.getContractAddress({
+        from: address,
+        nonce: transactionCount,
+      });
+
+      const priceInWei = ethers.utils.parseEther(price).toString();
+      const factory = new ethers.ContractFactory(NFTDoor_ABI, NFTDoor_bytecode, signer);
+      await factory.deploy(
+        config.app.subscriptionId,
+        name,
+        symbol,
+        `${config.app.uri}/api/metadata/${computedDeployedContractAddress}/`,
+        totalSupply,
+        priceInWei
+      );
+      const docRef = doc(firestore, tableName, computedDeployedContractAddress);
+      const rarePercentage = percantageBase - commonPercentage;
+      const dynamicNFT: DynamicNFT = {
+        creator: address,
+        contractAddress: computedDeployedContractAddress,
+        name,
+        symbol,
+        logo,
+        totalSupply,
+        priceInWei,
+        contents: [
+          { percentage: commonPercentage, image: commonImage, video: commonVideo, videDelayTime: commonVideoDelayTime },
+          { percentage: rarePercentage, image: rareImage, video: rareVideo, videDelayTime: rareVideoDelayTime },
+        ],
+      };
+      await setDoc(docRef, dynamicNFT);
+      await router.push("/");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -183,6 +194,7 @@ export const Create: React.FC = () => {
             color={config.styles.text.color.primary}
             shadow="md"
             onClick={create}
+            isLoading={isLoading}
           >
             Create
           </Button>
