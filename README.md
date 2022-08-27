@@ -16,6 +16,10 @@ NFTDoor is dynamic NFT launchpad powered by Chainlink VRF v2, creators can creat
 
 [Chainlink Integration is kept here](./CHAINLINK_INTEGRATION.md)
 
+## Tx
+
+[Callback Tx with minting](https://mumbai.polygonscan.com/tx/0xc6065f492b275ef2083ddd1840bcbb371c81276620db2bdd0ee66aa3f58f2365)
+
 ## Contract
 
 ![contracts-architecture](./docs/contracts-architecture.jpg)

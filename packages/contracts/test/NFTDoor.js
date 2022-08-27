@@ -19,7 +19,7 @@ describe("NFTDoor", function () {
 
   const subscriptionId = 1610;
   const keyHash = "0x4b09e658ed251bcafeebbc69400383d49f344ace09b9576fe248bb02c003fe9f"; //
-  const callbackGasLimit = 100000;
+  const callbackGasLimit = 1000000;
   const requestConfirmations = 3;
 
   beforeEach(async function () {
