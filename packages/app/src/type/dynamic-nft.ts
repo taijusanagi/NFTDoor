@@ -14,4 +14,7 @@ export interface DynamicNFT {
   totalSupply: string;
   priceInWei: string;
   contents: Content[];
+  tokenIdToRandomNumber: {
+    [key: string]: string;
+  };
 }
