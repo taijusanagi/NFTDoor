@@ -6,8 +6,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 
-//TODO: make this re-usable. we allow uesr to create register new dynamic NFT as launchpad.
-//TODO: We need to handle metadata request from each contract
 contract NFTDoor is Ownable, VRFConsumerBaseV2, ERC721Enumerable {
   struct MintInfo {
     address to;
@@ -20,20 +18,22 @@ contract NFTDoor is Ownable, VRFConsumerBaseV2, ERC721Enumerable {
   mapping(uint256 => MintInfo[]) public requestIdToMintInfos;
   mapping(uint256 => uint256) public tokenIdToRandomNumber;
 
-  VRFCoordinatorV2Interface COORDINATOR;
-  uint64 s_subscriptionId;
-  address vrfCoordinator = 0x7a1BaC17Ccc5b313516C5E16fb24f7659aA5ebed; //mumbai
-  bytes32 keyHash = 0x4b09e658ed251bcafeebbc69400383d49f344ace09b9576fe248bb02c003fe9f;//mumbai
-  uint32 callbackGasLimit = 100000;
-  uint16 requestConfirmations = 3;
+  VRFCoordinatorV2Interface public COORDINATOR;
 
-  string private _baseTokenURI;
-
+  uint64 public s_subscriptionId;
+  bytes32 public keyHash;
+  uint32 public callbackGasLimit;
+  uint16 public requestConfirmations;
   uint256 public mintLimit;
   uint256 public mintPrice;
+  string private _baseTokenURI;
 
   constructor(
+    address vrfCoordinator,
     uint64 subscriptionId,
+    bytes32 _keyHash,
+    uint32 _callbackGasLimit,
+    uint16 _requestConfirmations,
     string memory name,
     string memory symbol,
     string memory baseTokenURI,
@@ -42,6 +42,9 @@ contract NFTDoor is Ownable, VRFConsumerBaseV2, ERC721Enumerable {
   ) VRFConsumerBaseV2(vrfCoordinator) ERC721(name, symbol) {
     COORDINATOR = VRFCoordinatorV2Interface(vrfCoordinator);
     s_subscriptionId = subscriptionId;
+    keyHash = _keyHash;
+    callbackGasLimit = _callbackGasLimit;
+    requestConfirmations = _requestConfirmations;
     mintLimit = _mintLimit;
     mintPrice = _mintPrice;
 
@@ -83,7 +86,6 @@ contract NFTDoor is Ownable, VRFConsumerBaseV2, ERC721Enumerable {
     }
   }
 
-  //TODO: We should have contract address in base uri
   function _baseURI() internal view override returns (string memory) {
     return _baseTokenURI;
   }

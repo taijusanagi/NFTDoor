@@ -10,3 +10,15 @@ npx hardhat test
 GAS_REPORT=true npx hardhat test
 npx hardhat node
 ```
+
+## Unit Test
+
+```
+yarn hardhat test
+```
+
+## Integration Test
+
+```
+yarn hardhat test --network mumbai
+```
