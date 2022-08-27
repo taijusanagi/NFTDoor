@@ -2,7 +2,7 @@ import admin from "firebase-admin";
 
 import { tableName } from "./common";
 
-if (admin.app.length === 0) {
+if (admin.apps.length === 0) {
   admin.initializeApp({
     credential: admin.credential.cert({
       projectId: "nftdoor-193e9",
