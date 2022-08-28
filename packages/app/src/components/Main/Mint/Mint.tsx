@@ -4,9 +4,11 @@ import axios from "axios";
 import { ethers } from "ethers";
 import { useRouter } from "next/router";
 import React from "react";
-import { useProvider, useSigner } from "wagmi";
+import { GrInspect } from "react-icons/gr";
+import { useSigner } from "wagmi";
 
 import config from "../../../../config.json";
+import { useIsMounted } from "../../../hooks/useIsMounted";
 import NFTDoorArtifact from "../../../lib/contracts/NFTDoor.json";
 import { firestore, tableName } from "../../../lib/firebase/web";
 import { DynamicNFT } from "../../../type/dynamic-nft";
@@ -15,9 +17,10 @@ import { Modal } from "../../Modal";
 import { Viewer } from "../Viewer";
 
 export const Mint: React.FC = () => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen: isContentsOpen, onOpen: onContentsOpen, onClose: onContentsClose } = useDisclosure();
+  const { isOpen: isPreviewOpen, onOpen: onPreviewOpen, onClose: onPreviewClose } = useDisclosure();
+
   const { data: signer } = useSigner();
-  const provider = useProvider();
   const router = useRouter();
 
   const [dynamicNFT, setDynamicNFT] = React.useState<DynamicNFT>();
@@ -27,17 +30,33 @@ export const Mint: React.FC = () => {
   const [image, setImage] = React.useState("");
   const [effectVideo, setEffectVideo] = React.useState("");
   const [delayTime, setDelayTime] = React.useState(0);
+  const [tokensWithMetadata, setTokensWithMetadata] = React.useState<any[]>([]);
+
+  const { isMounted } = useIsMounted();
 
   React.useEffect(() => {
     const { contractAddress } = router.query;
     if (!contractAddress || typeof contractAddress !== "string") {
       return;
     }
+
     const docRef = doc(firestore, tableName, contractAddress);
     getDoc(docRef).then((doc) => {
       if (doc.exists()) {
-        setDynamicNFT(doc.data() as DynamicNFT);
+        const data = doc.data() as DynamicNFT;
+        setDynamicNFT(data);
       }
+    });
+
+    axios.get(`/api/getTokens/${contractAddress}`).then(({ data }) => {
+      Promise.all(
+        data.tokenIds.map((tokenId: string) => {
+          return axios.get(`/api/metadata/${contractAddress}/${tokenId}`);
+        })
+      ).then((tokensWithMetadata) => {
+        console.log("minted token loaded");
+        setTokensWithMetadata(tokensWithMetadata);
+      });
     });
   }, [router]);
 
@@ -51,7 +70,8 @@ export const Mint: React.FC = () => {
       const address = await signer.getAddress();
       const mintContract = new ethers.Contract(dynamicNFT.contractAddress, NFTDoorArtifact.abi, signer);
       console.log("requesting minting tx...");
-      const tx = await mintContract.requestRandomWords(address, 1);
+
+      const tx = await mintContract.requestRandomWords(address, 1, { value: dynamicNFT.priceInWei });
       console.log("tx sent, waiting for confirmation...");
       const receipt = await tx.wait();
       const mintingTokenId = receipt.events[1].args.tokenId.toString();
@@ -71,7 +91,7 @@ export const Mint: React.FC = () => {
         setImage(image);
         setEffectVideo(video);
         setDelayTime(delayTime);
-        onOpen();
+        onPreviewOpen();
         setIsLoading(false);
       });
     } catch (e) {
@@ -85,7 +105,62 @@ export const Mint: React.FC = () => {
         <Text fontSize="sm" color="blue.400" fontWeight={"bold"}>
           <Link href="/">{`> Home`}</Link>
         </Text>
-        <Box>
+        <Box position="relative">
+          {isMounted && (
+            <Box
+              position="absolute"
+              right="0"
+              py="1"
+              px="2"
+              m="1"
+              backgroundColor="gray.800"
+              color="white"
+              rounded="xl"
+              fontSize={"xs"}
+            >
+              <Text align="right">{ethers.utils.formatEther(dynamicNFT?.priceInWei || "0")} Matic</Text>
+              <Text align="right">
+                {tokensWithMetadata.length}/{dynamicNFT?.totalSupply}
+              </Text>
+            </Box>
+          )}
+          <Button position="absolute" m="1" rounded="xl" onClick={onContentsOpen}>
+            <GrInspect />
+          </Button>
+          <Modal isOpen={isContentsOpen} onClose={onContentsClose} header="Detail">
+            <Stack spacing="8">
+              <Box>
+                <Text mb="4" fontSize="sm" fontWeight="bold" color={config.styles.text.color.primary}>
+                  Common Item (70%)
+                </Text>
+                {isMounted && (
+                  <Flex justify="center">
+                    <Viewer
+                      image={"/img/samples/common.png"}
+                      effectVideo={"/img/samples/common.mp4"}
+                      delayTime={2000}
+                      isReplayable={true}
+                    />
+                  </Flex>
+                )}
+              </Box>
+              <Box>
+                <Text mb="4" fontSize="sm" fontWeight="bold" color={config.styles.text.color.primary}>
+                  Rare Item (30%)
+                </Text>
+                {isMounted && (
+                  <Flex justify="center">
+                    <Viewer
+                      image={"/img/samples/rare.png"}
+                      effectVideo={"/img/samples/rare.mp4"}
+                      delayTime={9000}
+                      isReplayable={true}
+                    />
+                  </Flex>
+                )}
+              </Box>
+            </Stack>
+          </Modal>
           <Image src={dynamicNFT?.logo} alt={"logo"} shadow="md" p="8" rounded="xl" fallback={<Skeleton />} />
         </Box>
         <ConnectWalletWrapper>
@@ -102,16 +177,15 @@ export const Mint: React.FC = () => {
           >
             Mint
           </Button>
-          <Modal isOpen={isOpen} onClose={onClose} header="Minted">
+          <Modal isOpen={isPreviewOpen} onClose={onPreviewClose} header="Minted">
             <Stack spacing="8">
               <Flex justify="center">
                 <Viewer image={image} effectVideo={effectVideo} delayTime={delayTime} />
               </Flex>
               <HStack justify="space-between">
-                <Button w="full" onClick={onClose}>
+                <Button w="full" onClick={onPreviewClose}>
                   Back
                 </Button>
-
                 <Button
                   w="full"
                   as={Link}

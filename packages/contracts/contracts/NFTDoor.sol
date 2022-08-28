@@ -61,7 +61,10 @@ contract NFTDoor is Ownable, VRFConsumerBaseV2, ERC721Enumerable {
   }
 
   function requestRandomWords(address to, uint32 amount) public payable {
-    require(totalSupply() + amount <= mintLimit, "NFTDoor: mint limit exceeded");
+    uint256 totalSupply = totalSupply();
+    require(totalSupply + amount <= mintLimit, "NFTDoor: mint limit exceeded");
+    require(msg.value == mintPrice, "NFTDoor: msg value invalid");
+
     uint256 requestId = COORDINATOR.requestRandomWords(
       keyHash,
       s_subscriptionId,
@@ -70,7 +73,7 @@ contract NFTDoor is Ownable, VRFConsumerBaseV2, ERC721Enumerable {
       amount
     );
     for (uint256 i = 0; i < amount; i++) {
-      uint256 tokenId = totalSupply() + i + 1;
+      uint256 tokenId = totalSupply + i + 1;
       MintInfo memory mintInfo = MintInfo({to: to, tokenId: tokenId});
       requestIdToMintInfos[requestId].push(mintInfo);
       emit Requested(tokenId);

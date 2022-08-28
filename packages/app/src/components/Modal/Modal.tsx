@@ -22,7 +22,7 @@ export interface ModalProps {
 export const Modal: React.FC<ModalProps> = ({ header, children, isOpen, onClose }) => {
   return (
     <Box>
-      <_Modal isOpen={isOpen} onClose={onClose} isCentered>
+      <_Modal isOpen={isOpen} onClose={onClose} isCentered scrollBehavior={"outside"}>
         <ModalOverlay />
         <ModalContent m="2">
           <ModalHeader>

@@ -100,13 +100,16 @@ describe("NFTDoor", function () {
   if (network.name === "mumbai") {
     describe.only("requestRandomWords", function () {
       it("Should sent a request to a random word", async function () {
-        await nftDoorContract.requestRandomWords(owner.address, 1);
+        await nftDoorContract.requestRandomWords(owner.address, 1, { value: mintPrice });
       });
     });
   } else {
     describe("requestRandomWords", function () {
       it("Should sent a request to a random word", async function () {
-        await expect(nftDoorContract.requestRandomWords(owner.address, 1)).to.emit(mockVRFCoordinatorV2, "Called");
+        await expect(nftDoorContract.requestRandomWords(owner.address, 1, { value: mintPrice })).to.emit(
+          mockVRFCoordinatorV2,
+          "Called"
+        );
       });
     });
   }

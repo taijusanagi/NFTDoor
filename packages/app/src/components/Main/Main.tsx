@@ -1,5 +1,6 @@
-import { Box, Image, Link, SimpleGrid, Stack, Text } from "@chakra-ui/react";
+import { Box, Image, Link, SimpleGrid, Skeleton, Stack, Text } from "@chakra-ui/react";
 import { collection, getDocs } from "@firebase/firestore";
+import { ethers } from "ethers";
 import React from "react";
 
 import config from "../../../config.json";
@@ -27,11 +28,26 @@ export const Main: React.FC = () => {
         <Text fontWeight="bold" color={config.styles.text.color.primary}>
           Created Dynamic NFTs
         </Text>
-        <SimpleGrid columns={{ base: 2, md: 4 }} gap="4" p="4">
+        <SimpleGrid columns={{ base: 1, md: 2 }} gap="4" p="4">
           {dynamicNFTs?.map((dynamicNFT) => {
             return (
               <Link href={`/mint/${dynamicNFT.contractAddress}`} key={dynamicNFT.contractAddress}>
-                <Image src={dynamicNFT.logo} alt={"logo"} shadow="md" p="6" rounded="xl" />
+                <Box position="relative">
+                  <Box
+                    position="absolute"
+                    right="0"
+                    py="1"
+                    px="2"
+                    m="1"
+                    backgroundColor="gray.800"
+                    color="white"
+                    rounded="xl"
+                    fontSize={"xs"}
+                  >
+                    <Text align="right">{ethers.utils.formatEther(dynamicNFT.priceInWei || "0")} Matic</Text>
+                  </Box>
+                  <Image src={dynamicNFT.logo} alt={"logo"} shadow="md" p="8" rounded="xl" fallback={<Skeleton />} />
+                </Box>
               </Link>
             );
           })}
