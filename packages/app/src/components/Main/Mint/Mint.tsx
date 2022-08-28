@@ -82,6 +82,7 @@ export const Mint: React.FC = () => {
         const mintedTokenId = tokenId.toString();
         console.log("callback recieved confirmed. minted:", tokenId);
         console.log("start calculate nft rarity using chainlink vrf random number...");
+        console.log(`/api/metadata/${contractAddress}/${mintedTokenId}`);
         const { data } = await axios.get(`/api/metadata/${contractAddress}/${mintedTokenId}`);
         console.log("calculated", data);
         const image = data.image;
@@ -95,6 +96,7 @@ export const Mint: React.FC = () => {
         setIsLoading(false);
       });
     } catch (e) {
+      console.error(e);
       setIsLoading(false);
     }
   };
