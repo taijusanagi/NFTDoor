@@ -8,6 +8,14 @@ NFTDoor is dynamic NFT launchpad powered by Chainlink VRF v2, creators can creat
 
 [NFTLaunch as NFT Launchpad](https://www.nftlaunch.network/)
 
+## Demo
+
+[Deployed App](https://nftdoor.vercel.app/)
+
+[Demo Video](https://youtu.be/9U8TD6t031I)
+
+[Google Slide](https://docs.google.com/presentation/d/12u0J9Wr-N4e5BYRuOOCwn_u21WbIp6RpJr2rqBDa7F8)
+
 ## Technical Detail
 
 [Technical Detail is kept here](./TECHNICAL_DETAIL.md)
