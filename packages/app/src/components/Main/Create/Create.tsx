@@ -180,6 +180,28 @@ export const Create: React.FC = () => {
             value={price}
           />
         </FormControl>
+        <Stack spacing="8">
+          <FormControl>
+            <Text mb="4" fontSize="sm" fontWeight="bold" color={config.styles.text.color.primary}>
+              Common Item (70%)
+            </Text>
+            {isMounted && (
+              <Flex justify="center">
+                <Viewer image={commonImage} effectVideo={commonVideo} delayTime={2000} isReplayable={true} />
+              </Flex>
+            )}
+          </FormControl>
+          <FormControl>
+            <Text mb="4" fontSize="sm" fontWeight="bold" color={config.styles.text.color.primary}>
+              Rare Item (30%)
+            </Text>
+            {isMounted && (
+              <Flex justify="center">
+                <Viewer image={rareImage} effectVideo={rareVideo} delayTime={9000} isReplayable={true} />
+              </Flex>
+            )}
+          </FormControl>
+        </Stack>
 
         <ConnectWalletWrapper>
           <Button
