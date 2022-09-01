@@ -22,5 +22,10 @@ module.exports = {
       url: "https://polygon-mumbai.g.alchemy.com/v2/vzOwiL7MTT2bjnZozNtemIWyq0zC6oYW",
       accounts,
     },
+    fuji: {
+      chainId: 43113,
+      url: "https://api.avax-test.network/ext/bc/C/rpc",
+      accounts,
+    },
   },
 };

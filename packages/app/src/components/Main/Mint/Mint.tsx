@@ -74,8 +74,8 @@ export const Mint: React.FC = () => {
       const tx = await mintContract.requestRandomWords(address, 1, { value: dynamicNFT.priceInWei });
       console.log("tx sent, waiting for confirmation...");
       const receipt = await tx.wait();
-      console.log(receipt)
-      const mintingTokenId = receipt.events[2].args.tokenId.toString();
+      console.log(receipt);
+      const mintingTokenId = receipt.events[1].args.tokenId.toString();
       console.log("tx confirmed, expected token id:", mintingTokenId);
       console.log("waiting chainlink vrf v2 callback");
       const filters = mintContract.filters.Minted(mintingTokenId);
